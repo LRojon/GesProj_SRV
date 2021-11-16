@@ -16,3 +16,5 @@ class User {
         return new User(row._id, row.name, row.password, row.mail, row.notification, row.theme, row.lastOpenned, projects)
     }
 }
+
+module.exports = User
