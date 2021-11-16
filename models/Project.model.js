@@ -26,9 +26,24 @@ class Project {
                     else {
                         throw (new Error(400, 'NEX', { element: 'user' }))
                     }
-                } catch ()
+                } catch (e) {
+                    let e = (new Error(400, 'NEX', { element: 'user' }))
+                    console.log(e.status + ' : ' + e.message)
+                }
             }
         })
+    }
+
+    static fromRow(row) {
+        let users = tasks = postits = links = meetings = [];
+        // Grosse requete pour User
+        /**
+         *  SELECT * FROM User u
+         *  JOIN Contribute c
+         *  ON c.user = u._id AND c.project = :projectId
+         * 
+         */
+        return new Project(row._id, row.name, row.overview, row.presentation, row.createdBy, [], [], [], [], [])
     }
 }
 
