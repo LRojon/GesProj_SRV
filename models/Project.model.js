@@ -1,5 +1,6 @@
 const sql = require('./db')
 const Error = require('./Error.model')
+const User = require('./User.model')
 
 class Project {
     constructor(_id, name, overview, presentation, createdBy, users, tasks, postits, links, meetings){
@@ -43,6 +44,15 @@ class Project {
          *  ON c.user = u._id AND c.project = :projectId
          * 
          */
+        sql.query("SELECT * FROM User u JOIN Contribute c ON c.user = u._id AND c.project = '" + row._id + "';", (err, uTuples) => {
+            if(err) { console.log(err) }
+            else {
+                for(const tuple in uTuples) {
+                    users.push(User.fromRow(tuple))
+                }
+            }
+        })
+
         return new Project(row._id, row.name, row.overview, row.presentation, row.createdBy, [], [], [], [], [])
     }
 }
