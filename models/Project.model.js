@@ -1,6 +1,7 @@
 const sql = require('./db')
 const Error = require('./Error.model')
 const User = require('./User.model')
+const Task = require('./Task.model')
 
 class Project {
     constructor(_id, name, overview, presentation, createdBy, users, tasks, postits, links, meetings){
@@ -36,20 +37,27 @@ class Project {
     }
 
     static fromRow(row) {
-        let users = tasks = postits = links = meetings = [];
-        // Grosse requete pour User
-        /**
-         *  SELECT * FROM User u
-         *  JOIN Contribute c
-         *  ON c.user = u._id AND c.project = :projectId
-         * 
-         */
+        let users = []
+        let tasks = []
+        let postits = []
+        let links = []
+        let meetings = []
+        // Requete retournant tous les user qui contribut à ce projet
         sql.query("SELECT * FROM User u JOIN Contribute c ON c.user = u._id AND c.project = '" + row._id + "';", (err, uTuples) => {
             if(err) { console.log(err) }
             else {
                 for(const tuple in uTuples) {
                     users.push(User.fromRow(tuple))
                 }
+                // Requete retournant toutes les tasks liées au projet
+                sql.query("SELECT * FROM TaskAPI WHERE project = '" + row._id + "';", (err, tTuples) => {
+                    if(err) { console.log(err) }
+                    else {
+                        for(const tuple in tTuples) {
+                            tasks.push(Task.fromRow(tuple))
+                        }
+                    }
+                })
             }
         })
 
