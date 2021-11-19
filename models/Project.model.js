@@ -29,19 +29,30 @@ class Project {
                         throw (new Error(400, 'NEX', { element: 'user' }))
                     }
                 } catch (e) {
-                    let e = (new Error(400, 'NEX', { element: 'user' }))
-                    console.log(e.status + ' : ' + e.message)
+                    let err = (new Error(400, 'NEX', { element: 'user' }))
+                    console.log(err.status + ' : ' + err.message)
                 }
             }
         })
     }
 
-    static fromRow(row) {
+    static async fromRow(row) {
         let users = []
         let tasks = []
         let postits = []
         let links = []
         let meetings = []
+
+        try {
+            const result = await sql.query("SELECT * FROM TaskAPI WHERE project = '" + row._id + "';")
+            for(const task of result) {
+                tasks.push(Task.fromRow(task))
+            }
+            console.log(tasks)
+        } catch(err) {
+            console.log(err)
+        }
+
         // Requete retournant tous les user qui contribut à ce projet
         sql.query("SELECT * FROM User u JOIN Contribute c ON c.user = u._id AND c.project = '" + row._id + "';", (err, uTuples) => {
             if(err) { console.log(err) }
@@ -50,14 +61,15 @@ class Project {
                     users.push(User.fromRow(tuple))
                 }
                 // Requete retournant toutes les tasks liées au projet
-                sql.query("SELECT * FROM TaskAPI WHERE project = '" + row._id + "';", (err, tTuples) => {
+                /*sql.query("SELECT * FROM TaskAPI WHERE project = '" + row._id + "';", (err, tTuples) => {
                     if(err) { console.log(err) }
                     else {
                         for(const tuple in tTuples) {
                             tasks.push(Task.fromRow(tuple))
                         }
+                        // Requete retournant les postIts liés au projet
                     }
-                })
+                })*/
             }
         })
 

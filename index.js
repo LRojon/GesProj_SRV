@@ -3,6 +3,8 @@ const app = express()
 const cors = require('cors')
 
 const links = require('./routes/Link')
+const users = require('./routes/User')
+const test = require('./routes/Test')
 
 app.use(express.json())
 app.use(cors())
@@ -15,5 +17,7 @@ app.use(function(req, res, next) {
 })
 
 app.use('/link', links)
+app.use('/user', users)
+app.use('/test', test)
 
 app.listen(8102, () => {console.log("App started, and listen on port 8102.")})
