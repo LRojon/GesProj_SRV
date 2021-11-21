@@ -4,7 +4,7 @@ const sql = require('../models/db')
 const Project = require('../models/Project.model')
 const Error = require('../models/Error.model')
 
-router.get('/', (req, res) => {
+router.get('/', async (req, res) => {
     sql.query("SELECT * FROM Project WHERE _id = '" + "c81208247b884b48b80e39bae703e295" + "';", (err, tuples) => {
         if(err) { console.log(err) }
         else {

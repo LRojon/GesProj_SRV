@@ -44,36 +44,24 @@ class Project {
         let meetings = []
 
         try {
-            const result = await sql.query("SELECT * FROM TaskAPI WHERE project = '" + row._id + "';")
+            // Requete retournant tous les user qui contribut à ce projet
+            let result = await sql.query("SELECT * FROM User u JOIN Contribute c ON c.user = u._id AND c.project = '" + row._id + "';")
+            for(const user of result) {
+                users.push(User.fromRow(user))
+            }
+
+            // Requete retournant toutes les tasks liées au projet
+            result = await sql.query("SELECT * FROM TaskAPI WHERE project_id = '" + row._id + "';")
             for(const task of result) {
                 tasks.push(Task.fromRow(task))
             }
-            console.log(tasks)
+
+            console.log(users)
         } catch(err) {
             console.log(err)
         }
 
-        // Requete retournant tous les user qui contribut à ce projet
-        sql.query("SELECT * FROM User u JOIN Contribute c ON c.user = u._id AND c.project = '" + row._id + "';", (err, uTuples) => {
-            if(err) { console.log(err) }
-            else {
-                for(const tuple in uTuples) {
-                    users.push(User.fromRow(tuple))
-                }
-                // Requete retournant toutes les tasks liées au projet
-                /*sql.query("SELECT * FROM TaskAPI WHERE project = '" + row._id + "';", (err, tTuples) => {
-                    if(err) { console.log(err) }
-                    else {
-                        for(const tuple in tTuples) {
-                            tasks.push(Task.fromRow(tuple))
-                        }
-                        // Requete retournant les postIts liés au projet
-                    }
-                })*/
-            }
-        })
-
-        return new Project(row._id, row.name, row.overview, row.presentation, row.createdBy, [], [], [], [], [])
+        return new Project(row._id, row.name, row.overview, row.presentation, row.createdBy, users, tasks, postits, links, meetings)
     }
 }
 
