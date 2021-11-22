@@ -2,6 +2,7 @@ const sql = require('./db')
 const Error = require('./Error.model')
 const User = require('./User.model')
 const Task = require('./Task.model')
+const Link = require('./Link.model')
 
 class Project {
     constructor(_id, name, overview, presentation, createdBy, users, tasks, postits, links, meetings){
@@ -56,7 +57,22 @@ class Project {
                 tasks.push(Task.fromRow(task))
             }
 
-            console.log(users)
+            // Requete retournant touts les postIts liés au projet
+            result = await sql.query("SELECT * FROM PostItAPI WHERE project_id ='" + row._id + "';")
+            for(const postIt of result) {
+                // Créer model de PostIt
+            }
+
+            // Requete retournant touts les liens liés au projet
+            result = await sql.query("SELECT * FROM LinkAPI WHERE project_id = '" + row._id + "';")
+            for(const link of result) {
+                links.push(Link.fromRow(link))
+            }
+
+            result = await sql.query("SELECT * FROM MeetingAPI WHERE project_id = '" + row._id + "';")
+            for(const meeting of result) {
+                // Créer model de Meeting
+            }
         } catch(err) {
             console.log(err)
         }

@@ -19,15 +19,7 @@ router.get('/:projectId', (req, res) => {
         (new Error(400, "INC", { id: req.params.projectId })).send(res)
     }
     else {
-        let query = "SELECT " +
-            "l._id," +
-            "l.label," +
-            "l.link," +
-            "l.project AS project_id," +
-            "p.name AS project " +
-        "FROM Link l " +
-        "LEFT JOIN Project p ON l.project = p._id " +
-        "WHERE l.project = '" + req.params.projectId + "'"
+        let query = "SELECT * FROM LinkAPI WHERE project_id = '" + req.params.projectId + "'"
 
         sql.query(query, (err, result) => {
             if(err) { console.log(err) }
@@ -36,6 +28,7 @@ router.get('/:projectId', (req, res) => {
                     if(err) { console.log(err) }
                     else { 
                         if(projects.length > 0) {
+                            console.log(result)
                             if(result.length > 0) {
                                 let data = []
                                 for(const row of result) {
