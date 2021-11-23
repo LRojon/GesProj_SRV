@@ -37,3 +37,5 @@ class PostIt {
         )
     }
 }
+
+module.exports = PostIt

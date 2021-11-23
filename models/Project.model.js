@@ -3,6 +3,7 @@ const Error = require('./Error.model')
 const User = require('./User.model')
 const Task = require('./Task.model')
 const Link = require('./Link.model')
+const PostIt = require('./PostIt.model')
 
 class Project {
     constructor(_id, name, overview, presentation, createdBy, users, tasks, postits, links, meetings){
@@ -60,7 +61,7 @@ class Project {
             // Requete retournant touts les postIts liés au projet
             result = await sql.query("SELECT * FROM PostItAPI WHERE project_id ='" + row._id + "';")
             for(const postIt of result) {
-                // Créer model de PostIt
+                postits.push(PostIt.fromRow(postIt))
             }
 
             // Requete retournant touts les liens liés au projet
