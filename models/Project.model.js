@@ -4,6 +4,7 @@ const User = require('./User.model')
 const Task = require('./Task.model')
 const Link = require('./Link.model')
 const PostIt = require('./PostIt.model')
+const Meeting = require('./Meeting.model')
 
 class Project {
     constructor(_id, name, overview, presentation, createdBy, users, tasks, postits, links, meetings){
@@ -11,31 +12,20 @@ class Project {
         this.name = name
         this.overview = overview
         this.presentation = presentation
+        this.createdBy = createdBy
         this.users = users
         this.tasks = tasks
         this.postits = postits
         this.links = links
         this.meetings = meetings
-        sql.query("SELECT _id, name FROM User WHERE _id = '" + createdBy + "';", (err, tuples) => {
-            if(err) { console.log(err) }
-            else {
-                try
-                {
-                    if(tuples.length > 0) {
-                        this.createdBy = {
-                            _id: tuples[0]._id,
-                            name: tuples[0].name
-                        }
-                    }
-                    else {
-                        throw (new Error(400, 'NEX', { element: 'user' }))
-                    }
-                } catch (e) {
-                    let err = (new Error(400, 'NEX', { element: 'user' }))
-                    console.log(err.status + ' : ' + err.message)
-                }
-            }
-        })
+    }
+
+    async #getCreatedBy(createdBy) {
+        const result = await sql.query("SELECT _id, name FROM User WHERE _id = '" + createdBy + "';")
+        return {
+            _id: result[0]._id,
+            name: result[0].name
+        }
     }
 
     static async fromRow(row) {
@@ -44,6 +34,7 @@ class Project {
         let postits = []
         let links = []
         let meetings = []
+        let createdBy = {}
 
         try {
             // Requete retournant tous les user qui contribut à ce projet
@@ -70,15 +61,22 @@ class Project {
                 links.push(Link.fromRow(link))
             }
 
+            // Requete retournant toutes les réunion liées au projet
             result = await sql.query("SELECT * FROM MeetingAPI WHERE project_id = '" + row._id + "';")
             for(const meeting of result) {
-                // Créer model de Meeting
+                meetings.push(await Meeting.fromRow(meeting))
+            }
+
+            result = await sql.query("SELECT _id, name FROM User WHERE _id = '" + row.createdBy + "';")
+            createdBy = {
+                _id: result[0]._id,
+                name: result[0].name
             }
         } catch(err) {
             console.log(err)
         }
 
-        return new Project(row._id, row.name, row.overview, row.presentation, row.createdBy, users, tasks, postits, links, meetings)
+        return new Project(row._id, row.name, row.overview, row.presentation, createdBy, users, tasks, postits, links, meetings)
     }
 }
 
