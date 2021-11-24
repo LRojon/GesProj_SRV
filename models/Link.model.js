@@ -16,7 +16,7 @@ class Link {
         console.log(result)
 
         return new Link(
-            body._id ? body._id : uuid.v4().replaceAll('-', ''), 
+            body._id ? body._id : uuid.v4().replaceAll('-', ''),
             body.label ? body.label : '', 
             body.link ? body.link : '', 
             body.project ? { 

@@ -77,7 +77,7 @@ router.post('/create', (req, res) => {
             else {
                 if(tuples.length > 0) {
                     let link = await Link.fromRequest(req.body)
-                    let query = 'INSERT INTO Link(_id, label, link, project) VALUES("' + link._id + '", "' + link.label + '", "' + link.link + '", "' + link.projectId + '");'
+                    let query = 'INSERT INTO Link(_id, label, link, project) VALUES("' + link._id + '", "' + link.label + '", "' + link.link + '", "' + link.project._id + '");'
                     sql.query(query, (err, result) => {
                         if(err) { console.log(err) }
                         else {

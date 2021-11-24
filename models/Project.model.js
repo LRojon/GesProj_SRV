@@ -8,6 +8,19 @@ const PostIt = require('./PostIt.model')
 const Meeting = require('./Meeting.model')
 
 class Project {
+    /**
+     * 
+     * @param {string} _id a string of exactly 32 char
+     * @param {string} name 
+     * @param {string} overview 
+     * @param {string} presentation 
+     * @param {object} createdBy { _id: string, name: string }
+     * @param {array} users 
+     * @param {array} tasks 
+     * @param {array} postits 
+     * @param {array} links 
+     * @param {array} meetings 
+     */
     constructor(_id, name, overview, presentation, createdBy, users, tasks, postits, links, meetings){
         this._id = _id
         this.name = name

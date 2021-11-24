@@ -41,13 +41,26 @@ router.post('/create', async (req, res) => {
 
     let project = await Project.fromRequest(req.body)
 
-    const insertProject = 0
+    const insertProject = await sql.query("INSERT INTO Project(_id, name, overview, presentation, createdBy) VALUES (" +
+        "\"" + project._id + "\", " + 
+        "\"" + project.name + "\", " +
+        "\"" + project.overview + "\", " + 
+        "\"" + project.presentation + "\", " + 
+        "\"" + project.createdBy._id + "\"" + 
+    ");")
 
     const insertContribute = await sql.query("INSERT INTO Contribute(_id, user, project, link, postIt, meeting, task, home, admin) VALUES(" + 
-        "'" + uuid.v4().replaceAll('-', '') + "', " +
-        "'" + project.createdBy._id + "', " + 
-        "'" + project._id + "', " + 
+        "\"" + uuid.v4().replaceAll('-', '') + "\", " +
+        "\"" + project.createdBy._id + "\", " + 
+        "\"" + project._id + "\", " + 
         "1, 1, 1, 1, 1, 1);")
+
+    if(insertProject.affectedRows * insertContribute.affectedRows !== 0) {
+        res.status(201).send({ message: 'Project created successfully' })
+    }
+    else {
+        (new Error(500, 'ENL')).send(res)
+    }
 })
 
 module.exports = router
