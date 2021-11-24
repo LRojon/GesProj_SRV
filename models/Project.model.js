@@ -1,4 +1,5 @@
 const sql = require('./db')
+const uuid = require('uuid')
 const Error = require('./Error.model')
 const User = require('./User.model')
 const Task = require('./Task.model')
@@ -18,14 +19,6 @@ class Project {
         this.postits = postits
         this.links = links
         this.meetings = meetings
-    }
-
-    async #getCreatedBy(createdBy) {
-        const result = await sql.query("SELECT _id, name FROM User WHERE _id = '" + createdBy + "';")
-        return {
-            _id: result[0]._id,
-            name: result[0].name
-        }
     }
 
     static async fromRow(row) {
@@ -67,16 +60,29 @@ class Project {
                 meetings.push(await Meeting.fromRow(meeting))
             }
 
-            result = await sql.query("SELECT _id, name FROM User WHERE _id = '" + row.createdBy + "';")
             createdBy = {
-                _id: result[0]._id,
-                name: result[0].name
+                _id: row.user_id,
+                name: row.createdBy
             }
         } catch(err) {
             console.log(err)
         }
 
         return new Project(row._id, row.name, row.overview, row.presentation, createdBy, users, tasks, postits, links, meetings)
+    }
+
+    static async fromRequest(body) {
+        const user = await sql.query("SELECT _id, name FROM User WHERE _id = '" + body.createdBy + "';")
+        let ret = {
+            _id: body._id ? body._id : uuid.v4().replaceAll('-', ''),
+            name: body.name || body.name !== '' ? body.name : 'Nouveau Projet',
+            presentation: body.presentation ? body.presentation : 'C\'est un nouveau projet qui commence !!!',
+            overview: body.overview ? body.overview : 'C\'est un nouveau projet qui commence !!! <br> Détaillé le ici !',
+            user_id: user.length > 0 ? user[0]._id : null,
+            createdBy : user.length > 0 ? user[0].name : null
+        }
+
+        return await Project.fromRow(ret)
     }
 }
 

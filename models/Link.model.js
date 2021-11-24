@@ -11,8 +11,9 @@ class Link {
     static fromRow(row) {
         return new Link(row._id, row.label, row.link,{ _id: row.project_id, name: row.project })
     }
-    static fromRequest(body) {
-        const result = sql.query("SELECT _id, name FROM Project WHERE _id = '" + body.project + "';")
+    static async fromRequest(body) {
+        const result = await sql.query("SELECT _id, name FROM Project WHERE _id = '" + body.project + "';")
+        console.log(result)
 
         return new Link(
             body._id ? body._id : uuid.v4().replaceAll('-', ''), 

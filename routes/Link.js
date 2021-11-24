@@ -72,17 +72,17 @@ router.post('/create', (req, res) => {
         (new Error(400, 'INC', { id: req.body.project })).send(res)
     }
     else {
-        sql.query("SELECT _id FROM Project WHERE _id = '" + req.body.project + "'", (err, tuples) => {
+        sql.query("SELECT _id FROM Project WHERE _id = '" + req.body.project + "'", async (err, tuples) => {
             if(err) { console.log(err) }
             else {
                 if(tuples.length > 0) {
-                    let link = Link.fromRequest(req.body)
+                    let link = await Link.fromRequest(req.body)
                     let query = 'INSERT INTO Link(_id, label, link, project) VALUES("' + link._id + '", "' + link.label + '", "' + link.link + '", "' + link.projectId + '");'
                     sql.query(query, (err, result) => {
                         if(err) { console.log(err) }
                         else {
                             if(result.affectedRows > 0) {
-                                res.status(201).send({ message: 'Link created successfully !' })
+                                res.status(201).send({ message: result })
                             }
                             else {
                                 (new Error(500).send(res))
