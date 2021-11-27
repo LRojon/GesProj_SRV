@@ -44,9 +44,19 @@ class Project {
 
         try {
             // Requete retournant tous les user qui contribut à ce projet
-            let result = await sql.query("SELECT * FROM User u JOIN Contribute c ON c.user = u._id AND c.project = '" + row._id + "';")
+            let result = await sql.query("SELECT * FROM UserForProject WHERE project = '" + row._id + "';")
+            console.log(result)
             for(const user of result) {
-                users.push(User.fromRow(user))
+                let u = User.fromRow(user)
+                u['permissions'] = {
+                    link : user.link === 1,
+                    postIt: user.postIt === 1,
+                    meeting: user.meeting === 1,
+                    task: user.task === 1,
+                    home: user.home === 1,
+                    admin: user.admin === 1
+                }
+                users.push(u)
             }
 
             // Requete retournant toutes les tasks liées au projet
