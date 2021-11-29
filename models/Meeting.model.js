@@ -34,6 +34,26 @@ class Meeting {
     }
 
     /**
+     * Remove this meeting and all invitation
+     * 
+     * @returns {int} The number of affected rows
+     */
+    async delete() {
+        let row = 0
+
+        const result = await sql.query("DELETE FROM Invited WHERE meeting = '" + this._id + "';")
+        if(result.affectedRows > 0) {
+            row += result.affectedRows
+            const res = await sql.query("DELETE FROM Meeting WHERE _id = '" + this._id + "';")
+            if(res.affectedRows > 0) { return res.affectedRows + row }
+            else { return 0 }
+        }
+        else {
+            return 0
+        }
+    }
+
+    /**
      * 
      * @param {object} row { _id: string, name: string, place: string, createdBy: { _id: string, name: string }, project: { _id: string, name:string } }
      * @returns A new instance of Meeting

@@ -3,7 +3,9 @@ const router = express.Router()
 const uuid = require('uuid')
 const sql = require('../models/db')
 const Error = require('../models/Error.model')
+const Meeting = require('../models/Meeting.model')
 const Project = require('../models/Project.model')
+const Task = require('../models/Task.model')
 
 /**
  * GET
@@ -89,6 +91,56 @@ router.post('/update', async (req, res) => {
     
     if(r.affectedRows === 1) { res.status(200).send('Updated successfully') }
     else { (new Error(500, 'ENL')).send(res) }
+})
+
+/**
+ * GET
+ * URL: /link/delete/:id
+ * 
+ * params:
+ *      id: String(32)
+ * 
+ * Supprime le lien qui a pour id :id
+ * 
+ */
+router.get('/delete/:id', async (req, res) => {
+    if(req.params.id.length != 32) { (new Error(400, 'INC', { id: req.params.id })).send(res) }
+
+    const resultL = await sql.query("DELETE FROM Link WHERE project = '" + req.params.id + "';")
+    if(resultL.affectedRows > 0) {
+        const resultP = await sql.query("DELETE FROM PostIt WHERE project = '" + req.params.id + "';")
+        if(resultP.affectedRows > 0) {
+            const resultM = await sql.query("SELECT * FROM MeetingAPI WHERE project = '" + req.params.id + "';")
+            for(const m of resultM) {
+                let tmp = await Meeting.fromRow(m)
+                if((await tmp.delete()) <= 0) { (new Error(500, 'ENL')).send(res) }
+            }
+
+            const resultT = await sql.query("SELECT * FROM TaskAPI WHERE project = '" + req.params.id + "';")
+            for(const t of resultT) {
+                let tmp = await Task.fromRow(t)
+                if((await tmp.delete()) <= 0) { (new Error(500, 'ENL')).send(res) }
+            }
+
+            const resultC = await sql.query("DELETE FROM Contribute WHERE project = '" + req.params.id + "';")
+            if(resultC.affectedRows > 0) {
+                const result = await sql.query("DELETE FROM Project WHERE _id = '" + req.params.id + "';")
+                if(result.affectedRows > 0) {
+                    res.status(200).send({ message: "Deleted successfully" })
+                }
+                else {
+                    (new Error(500, 'ENL')).send(res)
+                }
+            }
+            else {
+                (new Error(500, 'ENL')).send(res)
+            }
+        } else {
+            (new Error(500, 'ENL')).send(res)
+        }
+    } else {
+        (new Error(500, 'ENL')).send(res)
+    }
 })
 
 module.exports = router
