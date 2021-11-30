@@ -107,39 +107,39 @@ router.get('/delete/:id', async (req, res) => {
     if(req.params.id.length != 32) { (new Error(400, 'INC', { id: req.params.id })).send(res) }
 
     const resultL = await sql.query("DELETE FROM Link WHERE project = '" + req.params.id + "';")
-    if(resultL.affectedRows > 0) {
+    if(resultL.message === '') {
         const resultP = await sql.query("DELETE FROM PostIt WHERE project = '" + req.params.id + "';")
-        if(resultP.affectedRows > 0) {
-            const resultM = await sql.query("SELECT * FROM MeetingAPI WHERE project = '" + req.params.id + "';")
+        if(resultP.message === '') {
+            const resultM = await sql.query("SELECT * FROM MeetingAPI WHERE project_id = '" + req.params.id + "';")
             for(const m of resultM) {
-                let tmp = await Meeting.fromRow(m)
-                if((await tmp.delete()) <= 0) { (new Error(500, 'ENL')).send(res) }
+                let mesMeeting = await (await Meeting.fromRow(m)).delete()
+                if(mesMeeting !== '') { console.log("Meeting"); (new Error(500, 'ENL')).send(res) }
             }
 
-            const resultT = await sql.query("SELECT * FROM TaskAPI WHERE project = '" + req.params.id + "';")
+            const resultT = await sql.query("SELECT * FROM TaskAPI WHERE project_id = '" + req.params.id + "';")
             for(const t of resultT) {
-                let tmp = await Task.fromRow(t)
-                if((await tmp.delete()) <= 0) { (new Error(500, 'ENL')).send(res) }
+                let mesTask = await (await Task.fromRow(t)).delete()
+                if(mesTask !== '') { console.log("Task"); (new Error(500, 'ENL')).send(res) }
             }
 
             const resultC = await sql.query("DELETE FROM Contribute WHERE project = '" + req.params.id + "';")
-            if(resultC.affectedRows > 0) {
+            if(resultC.message === '') {
                 const result = await sql.query("DELETE FROM Project WHERE _id = '" + req.params.id + "';")
-                if(result.affectedRows > 0) {
+                if(result.message === '') {
                     res.status(200).send({ message: "Deleted successfully" })
                 }
                 else {
-                    (new Error(500, 'ENL')).send(res)
+                    console.log("Project"); (new Error(500, 'ENL')).send(res)
                 }
             }
             else {
-                (new Error(500, 'ENL')).send(res)
+                console.log("Contribute"); (new Error(500, 'ENL')).send(res)
             }
         } else {
-            (new Error(500, 'ENL')).send(res)
+            console.log("PostIt"); (new Error(500, 'ENL')).send(res)
         }
     } else {
-        (new Error(500, 'ENL')).send(res)
+        console.log("Link"); (new Error(500, 'ENL')).send(res)
     }
 })
 

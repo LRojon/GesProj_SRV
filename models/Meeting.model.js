@@ -39,13 +39,10 @@ class Meeting {
      * @returns {int} The number of affected rows
      */
     async delete() {
-        let row = 0
-
         const result = await sql.query("DELETE FROM Invited WHERE meeting = '" + this._id + "';")
-        if(result.affectedRows > 0) {
-            row += result.affectedRows
+        if(result.message === '') {
             const res = await sql.query("DELETE FROM Meeting WHERE _id = '" + this._id + "';")
-            if(res.affectedRows > 0) { return res.affectedRows + row }
+            if(res.message === '') { return res.message }
             else { return 0 }
         }
         else {
